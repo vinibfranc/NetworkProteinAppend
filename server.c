@@ -8,6 +8,8 @@
 #include <pthread.h>
 #include <time.h>
 
+int loc_sockfd;
+
 /* struct que representa a mensagem */
 /* Estrutura: quantidade de aminoácidos, solicitação ou reposta e lista com aminoácidos solicitados */
 
@@ -16,6 +18,7 @@
 Implementação do protocolo definido pela turma
 
 ====================================================*/
+
 
 typedef struct {
     uint8_t size;
@@ -50,22 +53,22 @@ typedef struct {
 int randomize_aminoacid() {
 	int aminoacids_qtd = 22;
 	char aminoacids[] = {'A', 'R', 'N', 'D', 'C', 'E', 'Q', 'G', 'H', 'I', 'U', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W','Y', 'V', 'O'};
-	int j, num, sorteado;	
+	int j, num, result;	
 	srand(time(NULL));	
 	num = 0 + (rand() % 21);
-	printf("Numero sorteado: %d \n", num);
+	printf("\nNumero sorteado: %d \n", num);
 		
 	for(j=0; j<aminoacids_qtd; j++) {
 		if(j == num) {
-			sorteado = aminoacids[j];
+			result = aminoacids[j];
 			printf("Sorteado: %d -> Aminoácido: %c", num, aminoacids[j]);
 			break;
 		}
 	}
-	return sorteado;
+	return result;
 }
 
-void send_aminoacid(int quantity) {
+int send_aminoacid(int quantity) {
 
 	int i;
 	/* Inicializando mensagem */
@@ -82,7 +85,9 @@ void send_aminoacid(int quantity) {
 		m.payload[i] = rand_n;
 	}
 	/* Enviando resposta */
-	int r = send(rem_sockfd, &m, sizeof(m), 0);
+	printf("Enviando aminoácido");
+	int s = send(loc_sockfd, &m, sizeof(m), 0);
+	return s;
 }
 
 
@@ -95,7 +100,7 @@ Implementação do servidor
 int main(int argc, char *argv[]) {
 
 	/* Variaveis Locais */
-	int loc_sockfd, loc_newsockfd, tamanho;
+	int loc_newsockfd, tamanho;
 	char linha[81];		
 	/* Estrutura: familia + endereco IP + porta */
 	struct sockaddr_in loc_addr;
@@ -129,7 +134,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	/* parametros(descritor socket,
-	numeros de conexões em espera sem serem aceites pelo accept)*/
+	numeros de conexões em espera sem serem aceitos pelo accept)*/
 	listen(loc_sockfd, 5);
 	printf("> aguardando conexao\n");
 
@@ -142,11 +147,14 @@ int main(int argc, char *argv[]) {
 
 		/* parametros(descritor socket, endereco da memoria, tamanho da memoria, flag) */
  		recv(loc_newsockfd, &linha, sizeof(linha), 0);
-		printf("Recebi %s\n", linha);
+		//printf("Recebi %s\n", linha);
+		printf("Recebi uma solicitação de aminoácidos");
 
 		/* parametros(descritor socket, endereco da memoria, tamanho da memoria, flag) */ 
-		send(loc_newsockfd, &linha, sizeof(linha), 0);
-		printf("Renvia %s\n", linha);
+		//send(loc_newsockfd, &linha, sizeof(linha), 0);
+		//printf("Renvia %s\n", linha);
+		send_aminoacid(1);
+
 	}while(strcmp(linha,"exit"));
 	/* fechamento do socket local */ 
 	close(loc_sockfd);

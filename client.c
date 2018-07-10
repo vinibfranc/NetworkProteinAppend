@@ -14,7 +14,9 @@ void *t_join_receiving;
 pthread_t t_solicitation[CLIENTS];
 pthread_t t_receiving[CLIENTS];
 pthread_mutex_t lock;
+
 int rem_sockfd;
+int ips[CLIENTS];
 
 /* struct que representa a mensagem */
 /* Estrutura: quantidade de aminoácidos, solicitação ou reposta e lista com aminoácidos solicitados */
@@ -55,10 +57,9 @@ int *send_solicitation() {
 	memset(&m.payload, 0, sizeof m.payload);
 	/* Enviando solicitação */
 	int r = send(rem_sockfd, &m, sizeof(m), 0);
-
+	printf("Enviando solicitação!!");
 	pthread_mutex_unlock(&lock);
 
-	printf("Enviando solicitação!!");
 	return r;
 }
 
@@ -78,6 +79,23 @@ void *receive_aminoacids() {
 	printf("\t Payload: %s\n", recv_buffer.payload);
 
 	pthread_mutex_unlock(&lock);
+}
+
+/* Retorna a lista de IPs presentes no arquivo de configuração */
+int get_ips() {
+	FILE *config_file;
+	char each_line[2][15];
+	int i=0;
+	if(!(fopen("config.txt", "r"))) {
+		printf("Erro ao abrir o arquivo!");
+		return 1;
+	}
+	//pega todos os IPs
+	while(fgets(each_line[i], CLIENTS, config_file) != NULL) {
+		ips[i] = each_line[i];
+		printf("%s", each_line[i]);
+		i++;
+	}
 }
 
 void initialize_threads_solicitation() {
@@ -119,12 +137,17 @@ int main(int argc, char *argv[]) {
 	char linha[81];
 
 	if (argc != 3) {
-		printf("Parametros:<remote_host> <remote_port> \n");
+		//printf("Parametros: <remote_port> \n");
+		printf("Parametros: <remote_host> <remote_port> \n");
 		exit(1);
 	}
 
 	/* Construcao da estrutura do endereco local */
 	/* Preenchendo a estrutura socket loc_addr (família, IP, porta) */
+	
+
+	//rem_hostname = ips[0];
+
 	rem_hostname = argv[1];
 	rem_port = atoi(argv[2]);
 	rem_addr.sin_family = AF_INET; /* familia do protocolo*/
@@ -152,7 +175,7 @@ int main(int argc, char *argv[]) {
 
 	do  {
 		//apagar!!!
-		gets(linha);	
+		//gets(linha);	
 
 		/* parametros(descritor socket, endereco da memoria, tamanho da memoria, flag) */
 		//send(rem_sockfd, &linha, sizeof(linha), 0);
