@@ -41,7 +41,7 @@ typedef struct {
     char payload[5];
 } aatp_msg;
 
-Exemplo de como enviar uma solicitação:
+//Exemplo de como enviar uma solicitação:
 
 /* Inicializando mensagem */
 aatp_msg m = { 0 };
@@ -53,7 +53,7 @@ memset(&m.payload, 0, sizeof m.payload);
 /* Enviando solicitação */
 int r = send(remote_socket_fd, &m, sizeof(m), 0);
 
-Exemplo de como enviar uma resposta:
+//Exemplo de como enviar uma resposta:
 
 /* Inicializando mensagem */
 aatp_msg m = { 0 };
@@ -72,7 +72,7 @@ m.payload[4] = 'E';
 /* Enviando solicitação */
 int r = send(remote_socket_fd, &m, sizeof(m), 0);
 
-Exemplo de como receber a mensagem:
+//Exemplo de como receber a mensagem:
 
 /* Criando buffer */
 aatp_msg recv_buffer;
