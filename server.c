@@ -24,31 +24,7 @@ typedef struct {
     char payload[5];
 } aatp_msg;
 
-/*int randomize_aminoacid(int quantity_solicited) {
-	int aminoacids_qtd = 22;
-	char aminoacids[aminoacids_qtd] = {'A', 'R', 'N', 'D', 'C', 'E', 'Q', 'G', 'H', 'I', 'U', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W','Y', 'V', 'O'};
-	int i, j, num;
-	int quantity = quantity_solicited;
-	int sorteados[quantity];	
-	srand(time(NULL));	
-	
-	for(i=0; i<quantity; i++) {
-		num = 0 + (rand() % 21);
-		printf("Numero sorteado: %d \n", num);
-		
-		for(j=0; j<aminoacids_qtd; j++) {
-			if(j == num) {
-				sorteados[i] = aminoacids[j];
-				printf("Sorteado: %d -> Aminoácido: %d", num, aminoacids[j]);
-				break;
-			}
-		}
-	}
-
-	//return sorteado;
-}*/
-
-int randomize_aminoacid() {
+char randomize_aminoacid() {
 	//srand(time(NULL));
 	int aminoacids_qtd = 20;
 	char aminoacids[] = {'A', 'R', 'N', 'D', 'C', 'E', 'Q', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W','Y', 'V'};
@@ -56,38 +32,8 @@ int randomize_aminoacid() {
 	num = 0 + (rand() % 20); 
 	printf("\nNumero sorteado: %d -> Aminiácido: %c\n", num, aminoacids[num]);
 		
-	/*for(j=0; j<aminoacids_qtd; j++) {
-		if(j == num) { // isso não é necessário, só usar aminoacids[num] e retornar
-			result = aminoacids[j]; // colocando um char em um int
-			printf("Sorteado: %d -> Aminoácido: %c", num, aminoacids[j]);
-			break;
-		}
-	}*/
 	return aminoacids[num]; 
 }
-
-/*int send_aminoacid(int quantity) {
-
-	int i;
-	Inicializando mensagem
-	aatp_msg m = { 0 };
-	Preenchendo dados
-	m.method = 'R'; Resposta
-	m.size = quantity;  Enviar a quantidade que foi solicitada
-	Zerando payload para evitar enviar lixo
-	   caso seja feita uma solicitação de menos de 5 aminoácidos
-	memset(&m.payload, 0, sizeof m.payload);
-	Preencher com os dados
-	for(i=0; i<quantity; i++){
-		int rand_n = randomize_aminoacid();
-		m.payload[i] = rand_n;
-	}
-
-	Enviando resposta //Para enviar a resposta ele primeiro precisa criar o socket, ouvir o socket com listen() e accept(), olha os exemplos que ele deu nas atividades
-	printf("Enviando aminoácido");
-	int s = send(loc_sockfd, &m, sizeof(m), 0);
-	return s;
-}*/
 
 
 /*==================================================
@@ -102,7 +48,11 @@ int main(int argc, char *argv[]) {
 	/* Variaveis Locais */
 	int i;
 	int loc_sockfd, loc_newsockfd, tamanho;
-	char linha[81];		
+	tamanho = sizeof(struct sockaddr_in); //PODE ESTAR AQUI
+ 
+	/* A mensagem recebida em bits é estruturada com o buffer do protocolo definido */		
+	aatp_msg recv_buffer;
+
 	/* Estrutura: familia + endereco IP + porta */
 	struct sockaddr_in loc_addr;
 	
@@ -136,51 +86,62 @@ int main(int argc, char *argv[]) {
 	
 	/* parametros(descritor socket,
 	numeros de conexões em espera sem serem aceitos pelo accept)*/
-	listen(loc_sockfd, 5); //Colocar este listen dentro de um while loop 
-	printf("> aguardando conexao\n");
+	// ============> while em volta do listen() como tu mesmo disse
+	listen(loc_sockfd, 3); 
 
-	tamanho = sizeof(struct sockaddr_in);
-   	/* Accept permite aceitar um pedido de conexao, devolve um novo "socket" ja ligado ao emissor do pedido e o "socket" original*/
-	/* parametros(descritor socket, estrutura do endereco local, comprimento do endereco)*/
-       	loc_newsockfd =	accept(loc_sockfd, (struct sockaddr *)&loc_addr, &tamanho);
+	//while(1){
+		printf("> Aguardando conexao\n");
+		/* Accept permite aceitar um pedido de conexao, devolve um novo "socket" ja ligado ao emissor do pedido e o "socket" original */
+		/* parametros(descritor socket, estrutura do endereco local, comprimento do endereco)*/
+		while(loc_newsockfd = accept(loc_sockfd, (struct sockaddr *)&loc_addr, (socklen_t*)&tamanho)){
 
-	while(1)  {
+			//loc_newsockfd =	accept(loc_sockfd, (struct sockaddr *)&loc_addr, &tamanho);
+			/* parametros(descritor socket, endereco da memoria, tamanho da memoria, flag) */
 
-		/* parametros(descritor socket, endereco da memoria, tamanho da memoria, flag) */
- 		recv(loc_newsockfd, &linha, sizeof(linha), 0);
-		//printf("Recebi %s\n", linha);
-		printf("Recebi uma solicitação de aminoácidos!");
+			// =============== > agora tu pode manipular o recv_buffer que nele terá as informações que tu precisa!
 
-		/* parametros(descritor socket, endereco da memoria, tamanho da memoria, flag) */ 
-		//send(loc_newsockfd, &linha, sizeof(linha), 0);
-		//printf("Renvia %s\n", linha);
-		//send_aminoacid(1); // Aqui tu não ta enviando o AA pelo socket, tem que por esse valor retornado dentro de um send() ou write()
+			/* parametros(descritor socket, endereco da memoria, tamanho da memoria, flag) */ 
+			//send(loc_newsockfd, &linha, sizeof(linha), 0);
+			//printf("Renvia %s\n", linha);
+			//send_aminoacid(1); // Aqui tu não ta enviando o AA pelo socket, tem que por esse valor retornado dentro de um send() ou write()
 
 
-		/*========================
-		Envio do(s) aminoácido(s)
-		==========================*/
+			/*========================
+			Envio do(s) aminoácido(s)
+			==========================*/
 
-		/* Inicializando mensagem */
-		aatp_msg m = { 0 };
-		/* Preenchendo dados */
-		m.method = 'R'; /* Resposta */
-		m.size = 3; /* TODO:=========Enviar a quantidade que foi solicitada =========*/
-		/* Zerando payload para evitar enviar lixo
-		   caso seja feita uma solicitação de menos de 5 aminoácidos */
-		memset(&m.payload, 0, sizeof m.payload);
-		/* Preencher com os dados */
-		for(i=0; i<3; i++){
-			int rand_n = randomize_aminoacid();
-			m.payload[i] = rand_n;
+			if(!fork()){
+				close(loc_sockfd);
+
+				recv(loc_newsockfd, &recv_buffer, sizeof(recv_buffer), 0);
+				//printf("Recebi %s\n", linha);
+				printf("Recebi uma solicitação de aminoácidos!");
+
+				aatp_msg m = { 0 };
+				/* Preenchendo dados */
+				m.method = 'R'; /* Resposta */
+				m.size = recv_buffer.size; 
+				/* Zerando payload para evitar enviar lixo
+				caso seja feita uma solicitação de menos de 5 aminoácidos */
+				memset(&m.payload, 0, sizeof(m.payload));
+				
+				/* Itera de acordo com size recebido pelo cliente */
+				for(i=0; i<recv_buffer.size; i++){
+					char rand_n = randomize_aminoacid();
+					printf("Aminoácido enviado: %c", rand_n);
+					m.payload[i] = rand_n;
+				}
+
+				/* Enviando resposta */ 
+				send(loc_newsockfd, &m, sizeof(m),0);
+
+				exit(0);
+			}
+			close(loc_newsockfd);
+			
 		}
-
-		/* Enviando resposta */ //Para enviar a resposta ele primeiro precisa criar o socket, ouvir o socket com listen() e accept(), olha os exemplos que ele deu nas atividades
-		printf("Enviando aminoácido!");
-		send(loc_sockfd, &m, sizeof(m), 0);
-
-	}
-	/* fechamento do socket local */ 
 	close(loc_sockfd);
-	close(loc_newsockfd);
+	//}
+	/* fechamento do socket local */ 
+	
 }
