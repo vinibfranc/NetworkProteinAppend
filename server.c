@@ -111,9 +111,9 @@ int main(int argc, char *argv[]) {
 		size_t buffer_len = sizeof(recv_buffer);
 		// parametros(descritor socket, endereco da memoria, tamanho da memoria, flag)
 		recv(loc_newsockfd, &recv_buffer, buffer_len, 0);
-		printf("\n=================================\n");
+		printf("\n===========================================\n");
 		printf("Recebendo solicitação de | %d | aminoácidos\n", recv_buffer.size);
-		printf("=================================\n\n");
+		printf("===========================================\n\n");
 
 		/*==================================================
 		Resposta com a quantidade de aminoácidos solicitados
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
 		send(loc_newsockfd, &m, sizeof(m), 0);
 //printf("\nEnviando aminoácidos\n!!");
 
-		sleep(2);
+		sleep(5);
 
 		close(loc_newsockfd);
 			

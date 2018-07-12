@@ -19,6 +19,8 @@
 
 // TODO: Alterar para quantidade de hosts (alunos) conforme quantos forem apresentar */
 #define CLIENTS 13
+#define PORT 1338
+#define PROTEIN_SIZE 609
 void *t_client_join;
 pthread_t t_client[CLIENTS];
 //pthread_mutex_t lock;
@@ -71,7 +73,7 @@ void *client_tasks() {
 		// Construcao da estrutura do endereco local
 		// Preenchendo a estrutura socket loc_addr (família, IP, porta)
 		rem_hostname = "127.0.0.1";
-		rem_port = atoi("7004");
+		rem_port = PORT;
 		rem_addr.sin_family = AF_INET; // familia do protocolo
 		rem_addr.sin_addr.s_addr = inet_addr(rem_hostname); // endereco IP local 
 		rem_addr.sin_port = htons(rem_port); // porta local  
@@ -98,9 +100,9 @@ void *client_tasks() {
 		==========================*/
 
 		int quantity = random_quantity();
-		printf("\n=================================\n");
+		printf("\n=======================================\n");
 		printf("Estou solicitando | %d | aminoácidos\n", quantity);
-		printf("=================================\n\n");
+		printf("=======================================\n\n");
 
 		//int z = 0;
 		//for(z = 0; z < quantity; z++) {
@@ -126,15 +128,41 @@ void *client_tasks() {
 			recv(rem_sockfd, &recv_buffer, recv_buffer_len, 0);
 			// Imprimindo resultados 
 
-			int q;
-			printf("\n\t====================================\n\n");
+			int c, q;
+			printf("\n\t====================================\n");
 			for(q=0; q < recv_buffer.size; q++) {
-				printf("\n\t Recebi --->  %c \n\n", recv_buffer.payload[q]);
-				//printf("\t== Method: %c ==\n", recv_buffer.method);
-				//printf("\t== Size: %d ==\n", recv_buffer.size);
-				//printf("\t== Payload: %c ==\n", recv_buffer.payload[q]);
+					printf("\n\t Recebi --->  %c \n\n", recv_buffer.payload[q]);
+					//printf("\t== Method: %c ==\n", recv_buffer.method);
+					//printf("\t== Size: %d ==\n", recv_buffer.size);
+					//printf("\t== Payload: %c ==\n", recv_buffer.payload[q]);
 			}
 			printf("\t====================================\n");
+
+			/*======================================
+			Gerenciamento dos aminoácidos recebidos
+			=======================================*/
+
+			char sequence[] = "MKWVTFISLLFLFSSAYSRGVFRRDAHKSEVAHRFKDLGEENFKALVLIAFAQYLQQCPFEDHVKLVNEVTEFAKTCVADESAENCDKSLHTLFGDKLCTVATLRETYGEMADCCAKQEPERNECFLQHKDDNPNLPRLVRPEVDVMCTAFHDNEETFLKKYLYEIARRHPYFYAPELLFFAKRYKAAFTECCQAADKAACLLPKLDELRDEGKASSAKQGLKCASLQKFGERAFKAWAVARLSQRFPKAEFAEVSKLVTDLTKVHTECCHGDLLECADDRADLAKYICENQDSISSKLKECCEKPLLEKSHCIAEVENDEMPADLPSLAADFVGSKDVCKNYAEAKDVFLGMFLYEYARRHPDYSVVLLLRLAKTYETTLEKCCAAADPHECYAKVFDEFKPLVEEPQNLIKQNCELFEQLGEYKFQNALLVRYTKKVPQVSTPTLVEVSRNLGKVGSKCCKHPEAKRMPCAEDCLSVFLNQLCVLHEKTPVSDRVTKCCTESLVNGRPCFSALEVDETYVPKEFNAETFTFHADICTLSEKERQIKKQTALVELVKHKPKATKEQLKAVMDDFAAFVEKCCKADDKETCFAEEGKKLVAASQAALGL";
+			char appending[PROTEIN_SIZE + 1];
+			int added = 0;
+
+			// Varre a proteína sequencialmente verificando se os valores enviados estão na sequência (ESTÁ PEGANDO TODOS OS AMINOÁCIDOS DA SEQUÊNCIA E NÃO SÓ O QUE FOI MANDADO)
+			for(c=0; c < PROTEIN_SIZE; c++) {
+				
+				for(q=0; q < recv_buffer.size; q++) {
+					//while(added == 0) {
+						//added = 0;
+						if(sequence[c] == recv_buffer.payload[q]) {
+							appending[c] = recv_buffer.payload[q];
+							printf("Achei %c na sequencia na posição %d \n", recv_buffer.payload[q], c);
+							added = 1;
+						}
+					//}
+				}
+				
+			}
+			
+			
 
 			//SALVAR EM ARRAY PARA COMPARAR COM A SEQUÊNCIA DA ALBUMINA
 		
