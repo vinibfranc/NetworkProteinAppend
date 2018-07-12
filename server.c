@@ -4,6 +4,12 @@
 	Redes de Computadores
  */
 
+/*
+	Comandos para compilar e rodar no terminal do Linux:
+		gcc server.c -o serv
+		./serv 1337
+ */
+
 /* Servidor aguarda solicitações de aminoácidos dos clientes */
 
 #include <stdio.h>
@@ -34,7 +40,7 @@ char randomize_aminoacid() {
 
 	int aminoacids_qtd = 20;
 	char aminoacids[] = {'A', 'R', 'N', 'D', 'C', 'E', 'Q', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W','Y', 'V'};
-	int j, num;	
+	int num;	
 	num = 0 + (rand() % 20); 
 	//printf("\nNumero sorteado: %d -> Aminoácido: %c\n", num, aminoacids[num]);
 		
@@ -141,72 +147,10 @@ int main(int argc, char *argv[]) {
 		send(loc_newsockfd, &m, sizeof(m), 0);
 //printf("\nEnviando aminoácidos\n!!");
 
-		sleep(5);
+		sleep(1);
 
 		close(loc_newsockfd);
 			
 	}
-	
 	close(loc_sockfd);
 }
-
-	/* código antigo */
-
-	//listen(loc_sockfd, 1); 
-
-	//while(1){
-		//printf("> Aguardando conexao\n");
-		/* Accept permite aceitar um pedido de conexao, devolve um novo "socket" ja ligado ao emissor do pedido e o "socket" original */
-		/* parametros(descritor socket, estrutura do endereco local, comprimento do endereco)*/
-		//while(loc_newsockfd = accept(loc_sockfd, (struct sockaddr *)&loc_addr, &tamanho)){
-		//	printf("aceitou");
-		//	recv(loc_newsockfd, &recv_buffer, sizeof(recv_buffer), 0);
-			//loc_newsockfd =	accept(loc_sockfd, (struct sockaddr *)&loc_addr, &tamanho);
-			/* parametros(descritor socket, endereco da memoria, tamanho da memoria, flag) */
-
-			// =============== > agora tu pode manipular o recv_buffer que nele terá as informações que tu precisa!
-
-			/* parametros(descritor socket, endereco da memoria, tamanho da memoria, flag) */ 
-			//send(loc_newsockfd, &linha, sizeof(linha), 0);
-			//printf("Renvia %s\n", linha);
-			//send_aminoacid(1); // Aqui tu não ta enviando o AA pelo socket, tem que por esse valor retornado dentro de um send() ou write()
-
-
-			/*========================
-			Envio do(s) aminoácido(s)
-			==========================*/
-/*
-			if(!fork()){
-				close(loc_sockfd);
-
-				recv(loc_newsockfd, &recv_buffer, sizeof(recv_buffer), 0);
-				//printf("Recebi %s\n", linha);
-				printf("Recebi uma solicitação de aminoácidos!");
-
-				aatp_msg m = { 0 };
-				/* Preenchendo dados */
-				//m.method = 'R'; /* Resposta */
-				//m.size = recv_buffer.size; 
-				/* Zerando payload para evitar enviar lixo
-				caso seja feita uma solicitação de menos de 5 aminoácidos */
-				//memset(&m.payload, 0, sizeof(m.payload));
-				
-				/* Itera de acordo com size recebido pelo cliente 
-				for(i=0; i<recv_buffer.size; i++){
-					char rand_n = randomize_aminoacid();
-					printf("Aminoácido enviado: %c", rand_n);
-					m.payload[i] = rand_n;
-				}
-
-				/* Enviando resposta 
-				send(loc_newsockfd, &m, sizeof(m),0);
-				exit(0);
-			}
-			close(loc_newsockfd);
-			*/
-		//}
-	//close(loc_sockfd);
-	//}
-	/* fechamento do socket local */ 
-	
-
