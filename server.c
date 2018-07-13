@@ -6,7 +6,7 @@
 
 /*
 	Comandos para compilar e rodar no terminal do Linux:
-		gcc server.c -o serv
+		gcc server.c -o serv -pthread
 		./serv 1337
  */
 
@@ -52,6 +52,52 @@ char randomize_aminoacid() {
 Implementação do servidor
 ====================================================*/
 
+void *connection_thread_function(void *new_loc_newsockfd){
+	int loc_newsockfd = *(int*)new_loc_newsockfd;
+	int read_size;
+
+	// A mensagem recebida em bits é estruturada com o buffer do protocolo definido	
+	aatp_msg recv_buffer;
+
+	size_t buffer_len = sizeof(recv_buffer);
+	// parametros(descritor socket, endereco da memoria, tamanho da memoria, flag)
+	while((read_size = recv(loc_newsockfd, &recv_buffer, buffer_len, 0)) > 0){
+		printf("\n===========================================\n");
+		printf("Recebendo solicitação de | %d | aminoácidos\n", recv_buffer.size);
+		printf("===========================================\n");
+
+		/*==================================================
+		Resposta com a quantidade de aminoácidos solicitados
+		====================================================*/
+
+		// Inicializando mensagem
+		aatp_msg m = { 0 };
+		// Preenchendo dados
+		m.method = 'R'; // Resposta
+		m.size = recv_buffer.size; 
+		// Zerando payload para evitar enviar lixo caso seja feita uma solicitação de menos de 5 aminoácidos 
+		memset(&m.payload, 0, sizeof(m.payload));
+		
+		printf("\n------------------\n");
+		int i = 0;
+		// Itera de acordo com size recebido pelo cliente 
+		for(i=0; i<recv_buffer.size; i++){
+			char rand_n = randomize_aminoacid();
+			printf("| Enviei --->  %c |\n", rand_n);
+			m.payload[i] = rand_n;
+		}
+		printf("------------------\n");
+		
+		// Envia a quantidade de aminoácidos solicitada pelo cliente
+		// parametros(descritor socket, endereco da memoria, tamanho da memoria, flag) 
+		send(loc_newsockfd, &m, sizeof(m), 0);
+	}
+
+	free(new_loc_newsockfd);
+    close(loc_newsockfd);
+    pthread_exit(NULL); 
+}
+
 int main(int argc, char *argv[]) {
 
 	// Inicializando semente para números aleatórios
@@ -59,7 +105,7 @@ int main(int argc, char *argv[]) {
 
 	// Variaveis Locais 
 	int i;
-	int loc_sockfd, loc_newsockfd, tamanho;
+	int loc_sockfd, loc_newsockfd, *new_loc_newsockfd, tamanho;
 	
 
 	// Estrutura: familia + endereco IP + porta 
@@ -97,60 +143,27 @@ int main(int argc, char *argv[]) {
 	
 	// Loop infinito para espera de conexões
 	printf(">Esperando uma conexao\n");
-	while(1) {
-		listen(loc_sockfd, 5);
-		
-		int sock_size = sizeof(struct sockaddr_in);
+	listen(loc_sockfd, 5);
+	
+	int sock_size = sizeof(struct sockaddr_in);
 
-		/*===================================================================
-		Preparação da estrutura do protocolo para recebimento da solicitação
-		=====================================================================*/
+	/*===================================================================
+	Preparação da estrutura do protocolo para recebimento da solicitação
+	=====================================================================*/
 
-		// A mensagem recebida em bits é estruturada com o buffer do protocolo definido	
-		aatp_msg recv_buffer;
-
-	   	// Accept permite aceitar um pedido de conexao, devolve um novo "socket" ja ligado ao emissor do pedido e o "socket" original
-		// parametros(descritor socket, estrutura do endereco local, comprimento do endereco)
-		loc_newsockfd =	accept(loc_sockfd, (struct sockaddr *)&loc_addr, &sock_size);
-
-		// Pega a quantidade de aminoácidos enviada
-		size_t buffer_len = sizeof(recv_buffer);
-		// parametros(descritor socket, endereco da memoria, tamanho da memoria, flag)
-		recv(loc_newsockfd, &recv_buffer, buffer_len, 0);
-		printf("\n===========================================\n");
-		printf("Recebendo solicitação de | %d | aminoácidos\n", recv_buffer.size);
-		printf("===========================================\n\n");
-
-		/*==================================================
-		Resposta com a quantidade de aminoácidos solicitados
-		====================================================*/
-
-		// Inicializando mensagem
-		aatp_msg m = { 0 };
-		// Preenchendo dados
-		m.method = 'R'; // Resposta
-		m.size = recv_buffer.size; 
-		// Zerando payload para evitar enviar lixo caso seja feita uma solicitação de menos de 5 aminoácidos 
-		memset(&m.payload, 0, sizeof(m.payload));
-		
-		printf("\n\t====================================\n");
-		// Itera de acordo com size recebido pelo cliente 
-		for(i=0; i<recv_buffer.size; i++){
-			char rand_n = randomize_aminoacid();
-			printf("\n\t Enviei --->  %c \n\n", rand_n);
-			m.payload[i] = rand_n;
-		}
-		printf("\t====================================\n");
-		
-		// Envia a quantidade de aminoácidos solicitada pelo cliente
-		// parametros(descritor socket, endereco da memoria, tamanho da memoria, flag) 
-		send(loc_newsockfd, &m, sizeof(m), 0);
-//printf("\nEnviando aminoácidos\n!!");
-
-		sleep(1);
-
-		close(loc_newsockfd);
-			
+	// Accept permite aceitar um pedido de conexao, devolve um novo "socket" ja ligado ao emissor do pedido e o "socket" original
+	// parametros(descritor socket, estrutura do endereco local, comprimento do endereco)
+	while(loc_newsockfd = accept(loc_sockfd, (struct sockaddr *)&loc_addr, &sock_size)) {
+	// Pega a quantidade de aminoácidos enviada
+		pthread_t connection_thread;
+        new_loc_newsockfd = malloc(sizeof *new_loc_newsockfd);
+        *new_loc_newsockfd = loc_newsockfd;
+		if( pthread_create(&connection_thread, NULL , connection_thread_function, (void*) new_loc_newsockfd) < 0) {
+            perror("Não foi possivel criar a thread");
+            return 1;
+        }
 	}
+	sleep(1);
+	close(loc_newsockfd);
 	close(loc_sockfd);
 }
