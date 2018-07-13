@@ -153,7 +153,6 @@ int main(int argc, char *argv[]) {
 	
 	// parametros(descritor socket, numeros de conexões em espera sem serem aceitos pelo accept)
 	
-	// Loop infinito para espera de conexões
 	printf(">Esperando uma conexao\n");
 	listen(loc_sockfd, 5);
 	
@@ -175,7 +174,7 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 	}
-	sleep(1);
+	sleep(2);
 	close(loc_newsockfd);
 	close(loc_sockfd);
 }
