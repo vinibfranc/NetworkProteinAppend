@@ -23,9 +23,9 @@
 #include <arpa/inet.h>
 #include <time.h>
 
-// TODO: Alterar para quantidade de hosts (alunos) conforme quantos forem apresentar */
+// TODO: Alterar para quantidade de hosts (alunos) conforme quantos forem apresentar e arquivo de configuração */
 #define CLIENTS 13
-#define PORT 1338
+#define PORT 1337
 #define PROTEIN_SIZE 609
 void *t_client_join;
 pthread_t t_client[CLIENTS];
@@ -117,7 +117,9 @@ void *client_tasks() {
 		}
 
 		/*========================
+
 		Envio da solicitação
+
 		==========================*/
 
 		int quantity = random_quantity();
@@ -138,7 +140,9 @@ void *client_tasks() {
 		send(rem_sockfd, &m, sizeof(m), 0);
 
 		/*========================
+
 		Recebimento da resposta
+
 		==========================*/
 
 		// Criando buffer 
@@ -179,9 +183,10 @@ void *client_tasks() {
 		if(count==PROTEIN_SIZE){
 			printf("\n=====================================================\n");
 			printf("Proteína completa! Todos os aminoácidos foram adicionados!\n");
-			printf("-----> Original: \n");
+			printf("\n-----> Original: \n");
 			puts(sequence);
-			printf("------> Resultado: \n");
+			printf("\n------> Resultado: \n");
+
 			//Lendo arquivo para confirmar a sequência
 			char letter;
 			FILE *result;
@@ -196,9 +201,10 @@ void *client_tasks() {
 			
 			fclose(result);
 			//Fim da leitura do arquivo
+
 			printf("\n=====================================================\n");
-			printf("\nResultado no arquivo appending.txt");
-			printf("\nVocê pode comparar os arquivos original_seq.txt e appending.txt para verificar! \n");
+			printf("\n-----> Resultado no arquivo appending.txt");
+			printf("\n-----> Você pode comparar os arquivos original_seq.txt e appending.txt para verificar! \n");
 			printf("\n=====================================================\n");
 			exit(1);
 		}
@@ -210,7 +216,6 @@ void *client_tasks() {
 	
 }
 
-//int main(int argc, char *argv[]) {
 int main() {
 
 	srand(time(NULL));

@@ -23,7 +23,9 @@
 #include <time.h>
 
 /*==================================================
+
 Implementação do protocolo definido pela turma
+
 ====================================================*/
 
 // struct que representa a mensagem */
@@ -49,12 +51,20 @@ char randomize_aminoacid() {
 
 
 /*==================================================
+
 Implementação do servidor
+
 ====================================================*/
 
 void *connection_thread_function(void *new_loc_newsockfd){
 	int loc_newsockfd = *(int*)new_loc_newsockfd;
 	int read_size;
+
+	/*==================================================
+
+	Recebimento da solicitação
+		
+	====================================================*/
 
 	// A mensagem recebida em bits é estruturada com o buffer do protocolo definido	
 	aatp_msg recv_buffer;
@@ -67,7 +77,9 @@ void *connection_thread_function(void *new_loc_newsockfd){
 		printf("===========================================\n");
 
 		/*==================================================
+
 		Resposta com a quantidade de aminoácidos solicitados
+
 		====================================================*/
 
 		// Inicializando mensagem
