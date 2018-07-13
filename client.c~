@@ -280,6 +280,11 @@ int main() {
 		sleep(2);
 		i++;
 	}
+
+	/*int i;
+    for(i=0; i<1; i++) {
+			pthread_create(&t_client[i], NULL, client_tasks, &i);
+   	}*/
 	
 	for(i=0; i<1; i++) {
 		pthread_join(t_client[i],&t_client_join);

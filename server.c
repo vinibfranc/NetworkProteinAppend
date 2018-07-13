@@ -133,8 +133,8 @@ int main(int argc, char *argv[]) {
 	loc_sockfd = socket(AF_INET, SOCK_STREAM, 0);	
 	
 	if (loc_sockfd < 0) {
-		perror("Criando stream socket");
-		exit(1);
+		printf("Criando stream socket");
+		//exit(1);
 	}
 
 	// Construcao da estrutura do endereco local
@@ -147,8 +147,8 @@ int main(int argc, char *argv[]) {
    	// Bind para o endereco local
 	// parametros(descritor socket, estrutura do endereco local, comprimento do endereco)
 	if (bind(loc_sockfd, (struct sockaddr *) &loc_addr, sizeof(struct sockaddr)) < 0) {
-		perror("Ligando stream socket");
-		exit(1);
+		printf("Ligando stream socket");
+		//exit(1);
 	}
 	
 	// parametros(descritor socket, numeros de conexões em espera sem serem aceitos pelo accept)
@@ -166,13 +166,13 @@ int main(int argc, char *argv[]) {
 	// parametros(descritor socket, estrutura do endereco local, comprimento do endereco)
 	while(loc_newsockfd = accept(loc_sockfd, (struct sockaddr *)&loc_addr, &sock_size)) {
 	// Pega a quantidade de aminoácidos enviada
-		pthread_t connection_thread;
+	pthread_t connection_thread;
         new_loc_newsockfd = malloc(sizeof *new_loc_newsockfd);
         *new_loc_newsockfd = loc_newsockfd;
 		if( pthread_create(&connection_thread, NULL , connection_thread_function, (void*) new_loc_newsockfd) < 0) {
-            perror("Não foi possivel criar a thread");
-            return 1;
-        }
+		    perror("Não foi possivel criar a thread");
+		    return 1;
+        	}
 	}
 	sleep(2);
 	close(loc_newsockfd);
